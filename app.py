@@ -40,7 +40,7 @@ def home():
     <body>
         <div class="container">
             <h1>MOGOM INVESTMENT</h1>
-            <h3>Your Financial Growth Partner</h3>
+            <h3>Your Financial  Partner</h3>
             <p>Loan Management System</p>
             <p>Welcome to MOGOM INVESTMENT.</p>
             <p>Our digital platform is being prepared.</p>
