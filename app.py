@@ -171,7 +171,7 @@ def admin_required(fn):
         if session.get("role") != "admin":
             abort(403)
         return fn(*args, **kwargs)
-   return wrapped
+    return wrapped
 
 
 @app.route("/")
