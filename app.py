@@ -586,8 +586,34 @@ def forbidden(error):
     return "Access denied: administrator permission required.", 403
 
 
+
 with app.app_context():
     db.create_all()
+
+    admin_name = os.environ.get("ADMIN_USERNAME")
+    admin_password = os.environ.get("ADMIN_PASSWORD")
+
+    if admin_name and admin_password:
+        if len(admin_password) < 16:
+            raise RuntimeError("ADMIN_PASSWORD must be at least 16 characters.")
+
+        admin = User.query.filter_by(role="admin").first()
+
+        if admin:
+            admin.username = admin_name
+            admin.password_hash = generate_password_hash(admin_password)
+            admin.active = True
+        else:
+            admin = User(
+                username=admin_name,
+                password_hash=generate_password_hash(admin_password),
+                role="admin",
+                active=True
+            )
+            db.session.add(admin)
+
+        db.session.commit()
+
 
     # Add the new loan category column to an existing database if it is missing.
     from sqlalchemy import inspect, text
