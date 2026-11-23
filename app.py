@@ -171,7 +171,10 @@ def admin_required(fn):
         if session.get("role") != "admin":
             abort(403)
         return fn(*args, **kwargs)
-    return wrapped@app.route("/")
+   return wrapped
+
+
+@app.route("/")
 def home():
     return page("""
     <div class="card" style="text-align:center;padding:45px 18px">
