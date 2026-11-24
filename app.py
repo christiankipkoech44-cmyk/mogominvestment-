@@ -202,8 +202,9 @@ def money(value):
     return Decimal(str(value or 0)).quantize(Decimal("0.01"))
 
 
+
 def send_sms(phone, message, category="General"):
-    """Send through Africa's Talking when configured; otherwise log."""
+    """Send SMS through Africa's Talking Sandbox or production."""
     sms = SMSLog(
         recipient=phone,
         message=message,
@@ -219,10 +220,50 @@ def send_sms(phone, message, category="General"):
 
     if not username or not api_key:
         sms.status = "Not configured"
-        sms.provider_response = (
-            "Africa's Talking credentials are not configured."
-        )
+        sms.provider_response = "Africa's Talking credentials are missing."
         return sms
+
+    try:
+        # Convert Kenyan local numbers to international format.
+        recipient = phone.strip().replace(" ", "")
+        if recipient.startswith("0") and len(recipient) == 10:
+            recipient = "+254" + recipient[1:]
+
+        response = requests.post(
+            "https://api.sandbox.africastalking.com/version1/messaging",
+            data={
+                "username": username,
+                "to": recipient,
+                "message": message
+            },
+            headers={
+                "apiKey": api_key,
+                "Accept": "application/json"
+            },
+            timeout=20
+        )
+
+        sms.provider_response = response.text[:4000]
+
+        if response.ok:
+            data = response.json()
+            recipients = data.get(
+                "SMSMessageData", {}
+            ).get("Recipients", [])
+
+            if any(r.get("status") == "Success" for r in recipients):
+                sms.status = "Sent"
+            else:
+                sms.status = "Failed"
+        else:
+            sms.status = "Failed"
+
+    except (requests.RequestException, ValueError) as exc:
+        sms.status = "Failed"
+        sms.provider_response = str(exc)[:1000]
+
+    return sms
+
 
     try:
         response = requests.post(
