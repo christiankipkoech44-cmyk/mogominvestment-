@@ -19,6 +19,10 @@ from werkzeug.security import check_password_hash, generate_password_hash
 # ------------------------------------------------------------
 
 app = Flask(__name__)
+
+@app.route("/health")
+def health():
+    return {"status": "healthy"}, 200
 app.config["SECRET_KEY"] = os.environ.get(
     "SECRET_KEY", "CHANGE-ME-BEFORE-PRODUCTION"
 )
