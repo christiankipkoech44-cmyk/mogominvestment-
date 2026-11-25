@@ -452,9 +452,6 @@ def logout():
     return redirect(url_for("login"))
 
 
-@app.route("/dashboard")
-@login_required
-def dashboard():
     customers_count = Customer.query.count()
     prospects_count = Prospect.query.count()
     loans_count = Loan.query.count()
