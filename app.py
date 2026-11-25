@@ -486,21 +486,98 @@ def customers():
     """, rows=rows, title="Customers")
 
 
+
 @app.route("/customers/new", methods=["GET", "POST"])
 @login_required
 def new_customer():
     if request.method == "POST":
         name = request.form.get("full_name", "").strip()
+
         try:
             phone = normalize_phone(request.form.get("phone"))
         except ValueError as exc:
             flash(str(exc))
             return redirect(url_for("new_customer"))
+
         if not name:
             flash("Customer name is required.")
             return redirect(url_for("new_customer"))
-        if Customer.query.filter_by(phone=phone).first(): 
-def login_required(fn):
+
+        if Customer.query.filter_by(phone=phone).first():
+            flash("A customer with this phone number already exists.")
+            return redirect(url_for("new_customer"))
+
+        national_id = request.form.get("national_id", "").strip() or None
+
+        if national_id and Customer.query.filter_by(national_id=national_id).first():
+            flash("This National ID is already registered.")
+            return redirect(url_for("new_customer"))
+
+        customer = Customer(
+            full_name=name,
+            phone=phone,
+            national_id=national_id,
+            address=request.form.get("address", "").strip(),
+            occupation=request.form.get("occupation", "").strip(),
+            loan_applied_for=request.form.get("loan_applied_for", "").strip()
+        )
+
+        try:
+            db.session.add(customer)
+            db.session.flush()
+
+            send_sms(
+                phone,
+                acknowledgment_message("customer", name),
+                "Customer Registration"
+            )
+
+            log_action(f"Registered customer: {name}")
+            db.session.commit()
+
+            flash("Customer registered successfully.")
+            return redirect(url_for(
+                "customer_detail",
+                customer_id=customer.id
+            ))
+
+        except Exception:
+            db.session.rollback()
+            logger.exception("Customer registration failed")
+            flash("Customer registration failed. Please try again.")
+            return redirect(url_for("new_customer"))
+
+    return page("""
+    <h1>Register New Customer</h1>
+    <div class="panel">
+    <form method="post">
+        <label>Full Name</label>
+        <input name="full_name" required>
+
+        <label>Phone Number</label>
+        <input name="phone" placeholder="0712345678" required>
+
+        <label>National ID</label>
+        <input name="national_id">
+
+        <label>Address</label>
+        <input name="address">
+
+        <label>Occupation</label>
+        <input name="occupation">
+
+        <label>Loan Applied For</label>
+        <select name="loan_applied_for">
+            <option value="">Select loan type</option>
+            <option value="Business Loans">Business Loans</option>
+            <option value="Financial Support">Financial Support</option>
+        </select>
+
+        <button type="submit">Register Customer</button>
+    </form>
+    </div>
+    """, title="Register Customer")
+
     @wraps(fn)
     def wrapped(*args, **kwargs):
         if not current_user():
