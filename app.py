@@ -771,9 +771,7 @@ def page(body, **context):
     return render_template_string(BASE, body=render_template_string(body, **context), **context)
 
 
-@app.route("/")
-def home():
-    return redirect(url_for("dashboard") if current_user() else url_for("login"))
+
 
 
 @app.route("/health")
