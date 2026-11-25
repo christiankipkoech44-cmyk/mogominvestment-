@@ -771,32 +771,7 @@ def page(body, **context):
     return render_template_string(BASE, body=render_template_string(body, **context), **context)
 
 
-
-
-
-
-
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        username = request.form.get("username", "").strip()
-        password = request.form.get("password", "")
-        user = User.query.filter_by(username=username, active=True).first()
-        if user and check_password_hash(user.password_hash, password):
-            session.clear()
-            session["user_id"] = user.id
-            log_action("Logged in")
-            db.session.commit()
-            return redirect(request.args.get("next") or url_for("dashboard"))
-        flash("Incorrect username or password, or the account is inactive.")
-    return page("""
-    <div class="panel" style="max-width:430px;margin:35px auto"><h1>Staff Login</h1>
-    <form method="post"><label>Username</label><input name="username" required autocomplete="username">
-    <label>Password</label><input type="password" name="password" required autocomplete="current-password">
-    <button type="submit">Sign In</button></form>
-    <p class="muted">If the administrator account has not yet been initialized, set ADMIN_PASSWORD in Railway Variables.</p></div>
-    """, title="Login")
+ 
 
 
 @app.route("/logout")
