@@ -501,4 +501,4 @@ def new_customer():
             return redirect(url_for("new_customer"))
 
         if Customer.query.filter_by(phone=phone).first():
-            flash("A customer with this phone number
+            flash("A customer with this phone number 
