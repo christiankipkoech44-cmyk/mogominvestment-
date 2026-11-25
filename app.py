@@ -774,14 +774,7 @@ def page(body, **context):
 
 
 
-@app.route("/health")
-def health():
-    try:
-        db.session.execute(text("SELECT 1"))
-        return {"status": "ok", "database": "connected"}, 200
-    except Exception as exc:
-        logger.exception("Health check failed")
-        return {"status": "error", "database": str(exc)[:200]}, 503
+
 
 
 @app.route("/login", methods=["GET", "POST"])
