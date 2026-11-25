@@ -499,7 +499,7 @@ def new_customer():
         if not name:
             flash("Customer name is required.")
             return redirect(url_for("new_customer"))
-        if Customer.query.filter_by(phone=phone).first() 
+        if Customer.query.filter_by(phone=phone).first(): 
 def login_required(fn):
     @wraps(fn)
     def wrapped(*args, **kwargs):
