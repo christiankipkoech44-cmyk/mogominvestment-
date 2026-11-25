@@ -771,16 +771,7 @@ def page(body, **context):
     return render_template_string(BASE, body=render_template_string(body, **context), **context)
 
 
- 
 
-
-@app.route("/logout")
-@login_required
-def logout():
-    log_action("Logged out")
-    db.session.commit()
-    session.clear()
-    return redirect(url_for("login"))
 
 
 @app.route("/dashboard")
